@@ -96,15 +96,47 @@ A saída de todas as versões é composta por:
 
 Foram medidos os seguintes tempos:
 
-| **Processos** | **Threads** | **Tempo (s)** | **Speedup** | **Eficiência** |
-|---------------------------|---------------|-------------|---------------|-------------|-----------------|
-|  1             | 1           | 2.896         | 1.00        | 100%           |
-| 4             | 1           | 1.062         | 2.73        | 68%            |
-| 4             | 4           | 0.047         | 61.89       | 387%           |
 
+1) Desempenho do `movie_mpi.c`
+   
+| # Processos(p) | Tempo (s) | Speedup S(p) | Eficiência E(p) |
+|------------:|----------:|-------------:|----------------:|
+| 1           | 1.031555  | 1.000        | 100.0%          |
+| 2           | 0.794190  | 1.299        | 64.9%           |
+| 4           | 1.033550  | 0.998        | 25.0%           |
+| 6           | 1.311308  | 0.787        | 13.1%           |
+| 12          | 0.244019  | 4.227        | 35.2%           |
+
+
+1) Desempenho do `movie_mpi_opm.c`
+   
+| # Processos(p) | Tempo (s) | Speedup S(p) | Eficiência E(p) |
+|------------:|----------:|-------------:|----------------:|
+| 1           | 0.010630  | 1.000        | 100.0%          |
+| 2           | 0.014282  | 0.744        | 37.2%           |
+| 4           | 0.072719  | 0.146        | 3.7%            |
+| 6           | 0.090551  | 0.117        | 2.0%            |
+| 12          | 0.253293  | 0.042        | 0.3%            |
 
 📝 Observação importante
+- `movies_mpi_opm` - otimizado, muito rápido sozinho
 
+  - Speedup cai conforme aumenta np.
+
+  - Eficiência despenca de 100% para 0.3%.
+  
+➡ Essa versão é tão rápida que o overhead de paralelização mata o ganho.
+Em termos de desempenho: rodar com np = 1 é o melhor cenário disparado.
+
+- `movies_mpi` - normal
+
+  - Escala um pouco de 1 → 2 processos.
+
+  - Se atrapalha em 4 e 6 processos.
+
+  - Tem um bom ganho em 12 processos (provavelmente explorando melhor o hardware, mesmo oversubscrito).
+
+➡ Paralelização só “compensa” mesmo em np = 2 e em np = 12 com esses dados.
 
 # 🔁 Resumo - Comandos essenciais
 
