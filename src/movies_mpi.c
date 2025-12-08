@@ -180,6 +180,7 @@ int main(int argc, char **argv) {
     }
 
     long line_num = 0;
+    double t0 = MPI_Wtime(); 
 
     // ======== 3) Leitura paralela das linhas =========
     while (fgets(line, MAX_LINE, f)) {
@@ -303,6 +304,12 @@ int main(int argc, char **argv) {
         free(all_tops);
     }
 
+    
+    double t1 = MPI_Wtime();  // fim da medição
+    if (rank == 0) {
+        printf("\n[SEM OpenMP] Tempo total = %.6f s\n", t1 - t0);
+    }
+    
     MPI_Finalize();
     return 0;
 }
