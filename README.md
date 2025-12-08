@@ -2,26 +2,26 @@
 
 Desenvolvido para a disciplina de **Programação Paralela**, este projeto realiza o processamento distribuído de um dataset de filmes utilizando:
 
-- **MPI (Message Passing Interface)** — paralelismo de memória distribuída  
-- **OpenMP** — paralelismo de memória compartilhada  
-- **Versão híbrida (MPI + OpenMP)**    
-- Estatísticas sobre avaliação dos filmes em português e **Top 30 filmes mais bem avaliados** 
+- **MPI (Message Passing Interface)** — paralelismo de memória distribuída
+- **OpenMP** — paralelismo de memória compartilhada
+- **Versão híbrida (MPI + OpenMP)**
+- Estatísticas sobre avaliação dos filmes em português e **Top 30 filmes mais bem avaliados**
 - Análise de desempenho com **tempo**, **speedup** e **eficiência**
 
 ---
 
 # 📦 O que este projeto faz
 
-1. **Lê e distribui o CSV de filmes** entre os processos MPI.  
+1. **Lê e distribui o CSV de filmes** entre os processos MPI.
 2. Cada processo:
-   - filtra e processa apenas seu subconjunto de linhas;  
-   - calcula estatísticas locais (filmes em português com contagem e média de popularidade);  
-   - mantém um Top-30 local.  
-3. Os métodos **`MPI_Reduce`** e  **`MPI_Gather`** reúnem resultados parciais.  
-4. O processo **rank 0** monta o **Top 30 final** entre todos os processos.  
+   - filtra e processa apenas seu subconjunto de linhas;
+   - calcula estatísticas locais (filmes em português com contagem e média de popularidade);
+   - mantém um Top-30 local.
+3. Os métodos **`MPI_Reduce`** e  **`MPI_Gather`** reúnem resultados parciais.
+4. O processo **rank 0** monta o **Top 30 final** entre todos os processos.
 5. Versões:
-   - `movies_mpi.c` → versão só MPI  
-   - `movies_mpi_opm.c` → versão híbrida com OpenMP  
+   - `movies_mpi.c` → versão só MPI
+   - `movies_mpi_opm.c` → versão híbrida com OpenMP
 
 ---
 
@@ -83,15 +83,18 @@ A saída de todas as versões é composta por:
 # 📊 Análise das Métricas de Desempenho
 ### 🧮 Fórmulas Utilizadas:
 
-- **Speedup** ($S_p$):  
-  $$
-  S_p = \frac{T_1}{T_p}
-  $$
+**Speedup (\(S_p\))**
 
-- **Eficiência** ($E_p$):  
-  $$
-  E_p = \frac{S_p}{P}
-  $$
+$$
+S_p = \frac{T_1}{T_p}
+$$
+
+**Eficiência (\(E_p\))**
+
+$$
+E_p = \frac{S_p}{P}
+$$
+
 
 
 Foram medidos os seguintes tempos:
@@ -107,7 +110,7 @@ A implementação com apenas MPI mostra um comportamento mais esperado:
 
 
 1) Desempenho do `movie_mpi.c`
-   
+
 | # Processos | Tempo (s)  | Speedup | Eficiência |
 |-------------|------------|---------|------------|
 | 1           | 0.007978   | 1.000   | 1.000      |

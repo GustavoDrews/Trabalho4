@@ -6,7 +6,7 @@
 
 #define MAX_LINE 8192
 #define MAX_FIELDS 64
-#define TOPK 30   
+#define TOPK 30
 
 typedef struct {
     char title[256];
@@ -61,7 +61,7 @@ int split_csv_quoted(char *line, char **fields, int max_fields) {
     return count;
 }
 
-// Insere candidato no top K local
+// Insere candidato no top 30(K) local
 void try_insert_topk(Film *top, const Film *cand) {
     if (cand->rating < 0.0) return;
 
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
     char line[MAX_LINE];
 
-    
+
     if (!fgets(line, MAX_LINE, f)) {
         if (rank == 0) fprintf(stderr, "Erro: arquivo vazio.\n");
         fclose(f);
@@ -180,9 +180,9 @@ int main(int argc, char **argv) {
     }
 
     long line_num = 0;
-    double t0 = MPI_Wtime(); 
+    double t0 = MPI_Wtime();
 
-    
+
     while (fgets(line, MAX_LINE, f)) {
 
         if ((line_num % size) != rank) {
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 
     fclose(f);
 
-   
+
     long count_pt_global = 0;
     double sum_pop_global = 0.0;
 
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
     MPI_Reduce(&sum_pop_local, &sum_pop_global, 1, MPI_DOUBLE, MPI_SUM, 0,
                MPI_COMM_WORLD);
 
-    
+
     Film *all_tops = NULL;
     if (rank == 0) {
         all_tops = (Film *)malloc(sizeof(Film) * TOPK * size);
@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
                all_tops, TOPK * sizeof(Film), MPI_BYTE,
                0, MPI_COMM_WORLD);
 
-    
+
     if (rank == 0) {
         printf("\n=== Filmes em Português ===\n");
         printf("Total de filmes PT: %ld\n", count_pt_global);
@@ -304,12 +304,12 @@ int main(int argc, char **argv) {
         free(all_tops);
     }
 
-    
+
     double t1 = MPI_Wtime();  // fim da medição
     if (rank == 0) {
         printf("\n[SEM OpenMP] Tempo total = %.6f s\n", t1 - t0);
     }
-    
+
     MPI_Finalize();
     return 0;
 }
