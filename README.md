@@ -95,48 +95,68 @@ A saída de todas as versões é composta por:
 
 
 Foram medidos os seguintes tempos:
+A implementação com apenas MPI mostra um comportamento mais esperado:
+
+- De 1 para 2 processos há uma melhoria real (speedup ≈ 1.48).
+
+- Com 4 processos ainda há ganho, mas menor.
+
+- A partir de 8 processos o desempenho começa a degradar.
+
+- Em 12 processos o speedup cai abaixo de 1 (overhead maior que o benefício).
 
 
 1) Desempenho do `movie_mpi.c`
    
-| # Processos(p) | Tempo (s) | Speedup S(p) | Eficiência E(p) |
-|------------:|----------:|-------------:|----------------:|
-| 1           | 1.031555  | 1.000        | 100.0%          |
-| 2           | 0.794190  | 1.299        | 64.9%           |
-| 4           | 1.033550  | 0.998        | 25.0%           |
-| 6           | 1.311308  | 0.787        | 13.1%           |
-| 12          | 0.244019  | 4.227        | 35.2%           |
+| # Processos | Tempo (s)  | Speedup | Eficiência |
+|-------------|------------|---------|------------|
+| 1           | 0.007978   | 1.000   | 1.000      |
+| 2           | 0.005404   | 1.476   | 0.738      |
+| 4           | 0.005686   | 1.403   | 0.351      |
+| 8           | 0.006428   | 1.241   | 0.155      |
+| 12          | 0.009006   | 0.886   | 0.074      |
 
+O programa tem uma pequena janela de escalabilidade eficiente, entre 2 e 4 processos.
 
-1) Desempenho do `movie_mpi_opm.c`
-   
-| # Processos(p) | Tempo (s) | Speedup S(p) | Eficiência E(p) |
-|------------:|----------:|-------------:|----------------:|
-| 1           | 0.010630  | 1.000        | 100.0%          |
-| 2           | 0.014282  | 0.744        | 37.2%           |
-| 4           | 0.072719  | 0.146        | 3.7%            |
-| 6           | 0.090551  | 0.117        | 2.0%            |
-| 12          | 0.253293  | 0.042        | 0.3%            |
+Para muitos processos, MPI adiciona overhead de comunicação e sincronizações que superam o ganho.
 
-📝 Observação importante
-- `movies_mpi_opm` - otimizado, muito rápido sozinho
+Também pode haver oversubscribe, especialmente se sua máquina não tem 12 núcleos físicos.
 
-  - Speedup cai conforme aumenta np.
+**Resultado:** Escalabilidade moderada para poucos processos, mas negativa para muitos.
 
-  - Eficiência despenca de 100% para 0.3%.
-  
-➡ Essa versão é tão rápida que o overhead de paralelização mata o ganho.
-Em termos de desempenho: rodar com np = 1 é o melhor cenário disparado.
+---
 
-- `movies_mpi` - normal
+2) Desempenho do `movie_mpi_opm.c`
 
-  - Escala um pouco de 1 → 2 processos.
+A tabela mostra que a versão híbrida (MPI + OpenMP) apresenta piora significativa de desempenho conforme o número de processos aumenta:
 
-  - Se atrapalha em 4 e 6 processos.
+- O tempo aumenta em vez de diminuir.
 
-  - Tem um bom ganho em 12 processos (provavelmente explorando melhor o hardware, mesmo oversubscrito).
+- O speedup cai para menos de 1 já com 2 processos.
 
-➡ Paralelização só “compensa” mesmo em np = 2 e em np = 12 com esses dados.
+- A eficiência despenca rapidamente (de 23% com 2 processos para menos de 1% com 12 processos).
+
+| # Processos | Tempo (s)  | Speedup | Eficiência |
+|-------------|------------|---------|------------|
+| 1           | 0.016815   | 1.000   | 1.000      |
+| 2           | 0.035435   | 0.475   | 0.237      |
+| 4           | 0.056498   | 0.298   | 0.074      |
+| 8           | 0.117992   | 0.143   | 0.018      |
+| 12          | 0.193663   | 0.087   | 0.007      |
+
+Isso indica que o uso combinado de MPI + OpenMP está adicionando mais overhead do que benefício. Possíveis causas:
+
+- O problema é pequeno demais para justificar paralelização híbrida.
+
+- Há custo alto de comunicação entre processos MPI.
+
+- As regiões paralelas OpenMP talvez sejam pequenas, ou existam operações serializadas.
+
+ - O ambiente está oversubscribed, causando competição por CPU.
+
+- A divisão do trabalho não compensa o custo de coordenação.
+
+**Resultado:** Escalabilidade negativa
 
 # 🔁 Resumo - Comandos essenciais
 
