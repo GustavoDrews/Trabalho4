@@ -6,7 +6,7 @@
 
 #define MAX_LINE 8192
 #define MAX_FIELDS 64
-#define TOPK 30   // top 30 geral
+#define TOPK 30   
 
 typedef struct {
     char title[256];
@@ -80,7 +80,7 @@ void try_insert_topk(Film *top, const Film *cand) {
     top[pos] = *cand;
 }
 
-// comparador para qsort (ordem decrescente)
+// comparador para qsort - ordem decrescente
 int cmp_films_desc(const void *a, const void *b) {
     const Film *fa = (const Film *)a;
     const Film *fb = (const Film *)b;
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
     char line[MAX_LINE];
 
-    // ======== 1) Ler cabeçalho =========
+    
     if (!fgets(line, MAX_LINE, f)) {
         if (rank == 0) fprintf(stderr, "Erro: arquivo vazio.\n");
         fclose(f);
@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
                idx_lang, idx_pop, idx_rating, idx_original_title, idx_release_date);
     }
 
-    // ======== 2) Estatísticas locais =========
+
     long count_pt_local = 0;
     double sum_pop_local = 0.0;
 
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
     long line_num = 0;
     double t0 = MPI_Wtime(); 
 
-    // ======== 3) Leitura paralela das linhas =========
+    
     while (fgets(line, MAX_LINE, f)) {
 
         if ((line_num % size) != rank) {
@@ -227,7 +227,7 @@ int main(int argc, char **argv) {
             sum_pop_local += pop;
         }
 
-        // TOP 30 geral (sem filtrar idioma)
+        // TOP 30 sem filtrar idioma
         Film cand;
         cand.rating = rating;
         cand.popularity = pop;
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 
     fclose(f);
 
-    // ======== 4) Redução global =========
+   
     long count_pt_global = 0;
     double sum_pop_global = 0.0;
 
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
     MPI_Reduce(&sum_pop_local, &sum_pop_global, 1, MPI_DOUBLE, MPI_SUM, 0,
                MPI_COMM_WORLD);
 
-    // ======== 5) Coleta do TOP K ========
+    
     Film *all_tops = NULL;
     if (rank == 0) {
         all_tops = (Film *)malloc(sizeof(Film) * TOPK * size);
@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
                all_tops, TOPK * sizeof(Film), MPI_BYTE,
                0, MPI_COMM_WORLD);
 
-    // ======== 6) Rank 0 monta e exibe resultado final =========
+    
     if (rank == 0) {
         printf("\n=== Filmes em Português ===\n");
         printf("Total de filmes PT: %ld\n", count_pt_global);

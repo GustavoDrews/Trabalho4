@@ -7,7 +7,7 @@
 
 #define MAX_LINE   8192
 #define MAX_FIELDS 64
-#define TOPK       30   // top 30 geral
+#define TOPK       30  
 
 typedef struct {
     char title[256];
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 
     char line[MAX_LINE];
 
-    // ======== 1) Ler cabeçalho e detectar índices das colunas ========
+   
     if (!fgets(line, MAX_LINE, f)) {
         if (rank == 0) fprintf(stderr, "Erro: arquivo vazio.\n");
         fclose(f);
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
                idx_lang, idx_pop, idx_rating, idx_original_title, idx_release_date);
     }
 
-    // ======== 2) Ler e armazenar apenas linhas pertencentes a este rank ========
+    
     long global_line_num = 0; // linhas de dados (sem cabeçalho)
 
     char **local_lines = NULL;
@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
 
     fclose(f);
 
-    // ======== 3) Estatísticas locais com OpenMP (count + soma popularidade PT) ========
+    
     double t0 = MPI_Wtime(); 
 
     long   count_pt_local = 0;
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    // ======== 4) Descobrir top 30 local (loop sequencial, geral) ========
+    
     Film top_local[TOPK];
     for (int i = 0; i < TOPK; i++) {
         top_local[i].rating = -1.0;
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
     }
     free(local_lines);
 
-    // ======== 5) Redução MPI para estatísticas globais ========
+    
     long   count_pt_global = 0;
     double sum_pop_global  = 0.0;
 
@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
     MPI_Reduce(&sum_pop_local, &sum_pop_global,   1, MPI_DOUBLE, MPI_SUM, 0,
                MPI_COMM_WORLD);
 
-    // ======== 6) Coleta do top 30 local de todos os ranks ========
+    
     Film *all_tops = NULL;
     if (rank == 0) {
         all_tops = (Film *)malloc(sizeof(Film) * TOPK * size);
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
                0,
                MPI_COMM_WORLD);
 
-    // ======== 7) Rank 0 monta resultado final ========
+    
     if (rank == 0) {
         printf("\n[OMP] === Filmes em Português ===\n");
         printf("Total de filmes PT: %ld\n", count_pt_global);
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
         free(all_tops);
     }
 
-    double t1 = MPI_Wtime();  // fim da medição
+    double t1 = MPI_Wtime(); 
     if (rank == 0) {
         printf("\n[COM OpenMP] Tempo total = %.6f s\n", t1 - t0);
     }
